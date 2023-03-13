@@ -3,6 +3,7 @@ let raw_blockTime = document.getElementById('blockTime')
 let raw_acc = document.getElementById('acc')
 let raw_sectors = document.getElementById('sectors')
 let raw_crew = document.getElementById('crew')
+let raw_dest = document.getElementById('dest')
 let calc = document.getElementById('calc')
 let results = document.getElementById('results-p')
 
@@ -11,8 +12,18 @@ let eightToOne = {1:"12:00", 2:"12:00", 3:"12:00", 4:"11:15"}
 let oneToSix = {1:"12:00", 2:"11:45", 3:"11:00", 4:"10:15"}
 let sixToTen = {1:"11:30", 2:"10:45", 3:"10:00", 4:"09:15"}
 let tenToSix = {1:"10:30", 2:"09:45", 3:"09:00", 4:"08:30"}
-
 let USA = [sixToEight, eightToOne, oneToSix, sixToTen, tenToSix]
+
+let sixToEightOther = {1:"12:00", 2:"11:15", 3:"10:30", 4:"09:45"}
+let eightToOneOther = {1:"12:00", 2:"12:00", 3:"12:00", 4:"11:15"}
+let oneToSixOther = {1:"12:00", 2:"11:15", 3:"10:30", 4:"09:45"}
+let sixToTenOther = {1:"11:00", 2:"10:15", 3:"09:30", 4:"08:45"}
+let tenToSixOther = {1:"10:00", 2:"09:15", 3:"08:30", 4:"08:00"}
+let Other = [sixToEightOther,
+    eightToOneOther,
+    oneToSixOther,
+    sixToTenOther,
+    tenToSixOther]
 
 
 
@@ -22,8 +33,9 @@ function calculate (){
     let acc = raw_acc.value
     let sectors = raw_sectors.value
     let crew = raw_crew.value
-    console.log(depTime, blockTime, acc, sectors, crew)
-    let mFdp = fdp(depTime, sectors)
+    let dest = raw_dest.value
+    console.log(depTime, blockTime, acc, sectors, crew, dest)
+    let mFdp = fdp(depTime, sectors, dest)
     display(depTime,blockTime,sectors,acc,crew,mFdp)
     // calculate(depTime)
 };
@@ -39,28 +51,41 @@ function display (depTime,blockTime,sectors,acc,crew,mFdp) {
     `
 }
 
-function fdp(dt, s){
+function fdp(dt, s, dest){
     let report = ''
-    let repo = ''
-    if ("06:00" <= dt && dt <= "07:59"){
-        report = sixToEight[s]
-        return report
-    } else if ("0800" <= dt && dt <= "12:59"){
-        report = eightToOne[s]
-        return report
-    } else if ("1300" <= dt && dt <= "17:59"){
-        report = oneToSix[s]
-        return report
-    } else if ("1800" <= dt && dt <= "21:59"){
-        report = sixToTen[s]
-        return report
+    if (dest == "USA & Canada") {
+        if ("06:00" <= dt && dt <= "07:59"){
+            report = sixToEight[s]
+            return report
+        } else if ("0800" <= dt && dt <= "12:59"){
+            report = eightToOne[s]
+            return report
+        } else if ("1300" <= dt && dt <= "17:59"){
+            report = oneToSix[s]
+            return report
+        } else if ("1800" <= dt && dt <= "21:59"){
+            report = sixToTen[s]
+            return report
+        } else {
+            report = tenToSix[s]
+            return report
+        }
     } else {
-        report = tenToSix[s]
-        return report
-    }
+        if ("06:00" <= dt && dt <= "07:59"){
+            report = sixToEightOther[s]
+            return report
+        } else if ("0800" <= dt && dt <= "12:59"){
+            report = eightToOneOther[s]
+            return report
+        } else if ("1300" <= dt && dt <= "17:59"){
+            report = oneToSixOther[s]
+            return report
+        } else if ("1800" <= dt && dt <= "21:59"){
+            report = sixToTenOther[s]
+            return report
+        } else {
+            report = tenToSixOther[s]
+            return report
+        }
+    } 
 }
-
-// function calculate(depTime){
-//     let dt = []
-//     if(depTime)
-// }
