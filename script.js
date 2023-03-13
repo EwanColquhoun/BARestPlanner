@@ -1,6 +1,7 @@
 
 let raw_depTime = document.getElementById('depTime')
 let raw_blockTime = document.getElementById('blockTime')
+let raw_fltTime = document.getElementById('fltTime')
 let raw_toTime = document.getElementById('toTime')
 let raw_acc = document.getElementById('acc')
 let raw_sectors = document.getElementById('sectors')
@@ -31,6 +32,7 @@ let Other = [sixToEightOther,
 function calculate (){
     let depTime = raw_depTime.value
     let blockTime = raw_blockTime.value
+    let fltTime = raw_fltTime.value
     let toTime = raw_toTime.value
     let acc = raw_acc.value
     let sectors = raw_sectors.value
@@ -38,12 +40,13 @@ function calculate (){
     let dest = raw_dest.value
     console.log(depTime, blockTime, acc, sectors, crew, dest)
     let mFdp = fdp(depTime, sectors, dest)
-    let latest = latestBlock(depTime, blockTime, mFdp)
-    display(depTime,blockTime,sectors,acc,crew,mFdp, latest)
+    let latest = latestBlock(depTime, blockTime, mFdp, fltTime)
+    let lastTot = lastTo(latest, fltTime, mFdp)
+    display(depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot)
 
 };
 
-function display (depTime,blockTime,sectors,acc,crew,mFdp, latest) {
+function display (depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot) {
     results.innerHTML = `<span>
     Report Time (Local): ${depTime}<br>
     Block time:${blockTime}.<br>
@@ -52,6 +55,7 @@ function display (depTime,blockTime,sectors,acc,crew,mFdp, latest) {
     Acclimatised: ${acc}<br>
     MAX FDP: ${mFdp}<br>
     Latest on blocks: ${latest}<br>
+    Latest Take-off ${lastTot}
     </span>
     `
 }
@@ -100,12 +104,19 @@ function latestBlock(depTime, blockTime, mFdp){
     let max = mFdp.split(':');
 
     var dur = luxon.Duration.fromObject({hours: btime[0], minutes: btime[1]})
-    let updated = luxon.DateTime.fromISO(depTime).plus(dur).toString()
+    // let updated = luxon.DateTime.fromISO(depTime).plus(dur).toString()
     let mFdpTime = luxon.Duration.fromObject({hours: max[0], minutes: max[1]})
 
     let latestBlock = luxon.DateTime.fromISO(depTime).plus(mFdpTime).toFormat('T')
-
     return latestBlock
+}
+
+function lastTo(latest, fltTime, mFdp){
+    let ftime = fltTime.split(':');
+    let dur = luxon.Duration.fromObject({hours: ftime[0], minutes: ftime['1']})
+    let lastToTime = luxon.DateTime.fromISO(latest).minus(dur).toFormat('T')
+    console.log(lastToTime)
+    return lastToTime
 }
 
 // export {calculate}
