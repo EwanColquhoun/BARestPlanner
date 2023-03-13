@@ -1,1 +1,53 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BA Rest Planner</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body>
+    <div class="background">
+        <div>
+            <h1>BA Rest Planner</h1>
+        </div>
+        <div id="input-div">
+            <ul>
+                <li>
+                    <label for="dep-time">Departure:</label>
+                    <input id="depTime" name="dep-time" type="time"> 
+                </li>
+                <li>
+                    <label for="block-time">Block Time:</label>
+                    <input id="blockTime" name="block-time" type="time" value="05:00">
+                </li>
+                <li>
+                    <label for="acclimatised">Acclimatised:</label>
+                    <input type="radio" name="acclimatised" id="acc" checked>
+                </li>
+                <li>
+                    <label for="sectors">Sectors:</label>
+                    <input type="range" name="sectors" id="sectors" max="4" step="1" value="1">
+                </li>
+                <li>
+                    <label for="crew">Crew:</label>
+                    <input type="range" name="crew" id="crew" max="4" step="1" value="2">
+                </li>
+            </ul>
+        </div>
+        <div>
+            <button id="calc" onclick="calculate()">Calculate</button>
+        </div>
+        <div id="results-div">
+            <div>
+                <h2>Results:</h2>
+            </div>
+            <div>
+                <p id="results-p">Crew Required:</p>
+            </div>
+        </div>       
+    </div>
+    <script src="script.js" type="application/javascript"></script>
+</body>
+</html>
