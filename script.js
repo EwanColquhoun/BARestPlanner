@@ -1,6 +1,7 @@
 
 let raw_depTime = document.getElementById('depTime')
 let raw_blockTime = document.getElementById('blockTime')
+let raw_toTime = document.getElementById('toTime')
 let raw_acc = document.getElementById('acc')
 let raw_sectors = document.getElementById('sectors')
 let raw_crew = document.getElementById('crew')
@@ -30,6 +31,7 @@ let Other = [sixToEightOther,
 function calculate (){
     let depTime = raw_depTime.value
     let blockTime = raw_blockTime.value
+    let toTime = raw_toTime.value
     let acc = raw_acc.value
     let sectors = raw_sectors.value
     let crew = raw_crew.value
@@ -42,14 +44,15 @@ function calculate (){
 };
 
 function display (depTime,blockTime,sectors,acc,crew,mFdp, latest) {
-    results.innerHTML = `
-    Report Time (Local): ${depTime}\n
-    Block time:${blockTime}.\n
-    \n Crew: ${crew}\n
-    Sectors: ${sectors}\n
-    Acclimatised: ${acc}\n
-    MAX FDP: ${mFdp}
-    Latest on blocks: ${latest}
+    results.innerHTML = `<span>
+    Report Time (Local): ${depTime}<br>
+    Block time:${blockTime}.<br>
+    Crew: ${crew}<br>
+    Sectors: ${sectors}<br>
+    Acclimatised: ${acc}<br>
+    MAX FDP: ${mFdp}<br>
+    Latest on blocks: ${latest}<br>
+    </span>
     `
 }
 
