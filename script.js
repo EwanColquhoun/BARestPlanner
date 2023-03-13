@@ -41,7 +41,7 @@ function calculate (){
 
 };
 
-function display (depTime,blockTime,sectors,acc,crew,mFdp) {
+function display (depTime,blockTime,sectors,acc,crew,mFdp, latest) {
     results.innerHTML = `
     Report Time (Local): ${depTime}\n
     Block time:${blockTime}.\n
@@ -49,6 +49,7 @@ function display (depTime,blockTime,sectors,acc,crew,mFdp) {
     Sectors: ${sectors}\n
     Acclimatised: ${acc}\n
     MAX FDP: ${mFdp}
+    Latest on blocks: ${latest}
     `
 }
 
@@ -94,18 +95,13 @@ function fdp(dt, s, dest){
 function latestBlock(depTime, blockTime, mFdp){
     let btime = blockTime.split(':');
     let max = mFdp.split(':');
-    console.log(btime, 'btime')
-    console.log(max, 'mtime')
-    
+
     var dur = luxon.Duration.fromObject({hours: btime[0], minutes: btime[1]})
     let updated = luxon.DateTime.fromISO(depTime).plus(dur).toString()
     let mFdpTime = luxon.Duration.fromObject({hours: max[0], minutes: max[1]})
 
-    let latestBlock = luxon.DateTime.fromISO(updated).plus(mFdpTime).toString()
+    let latestBlock = luxon.DateTime.fromISO(depTime).plus(mFdpTime).toFormat('T')
 
-    console.log(mFdp, 'mfdp')
-    console.log(updated, 'updated')
-    console.log(latestBlock, 'latest')
     return latestBlock
 }
 
