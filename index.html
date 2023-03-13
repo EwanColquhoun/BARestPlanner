@@ -5,6 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BA Rest Planner</title>
+    <script src="
+https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js
+"></script>
     <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body>
@@ -15,8 +18,8 @@
         <div id="input-div">
             <ul>
                 <li>
-                    <label for="dep-time">Departure:</label>
-                    <input id="depTime" name="dep-time" type="time"> 
+                    <label for="dep-time">Report Time (Local):</label>
+                    <input id="depTime" autofocus name="dep-time" type="time"> 
                 </li>
                 <li>
                     <label for="block-time">Block Time:</label>
@@ -56,6 +59,7 @@
             </div>
         </div>       
     </div>
+    <script src="luxon.js"></script>
     <script src="script.js" type="application/javascript"></script>
 </body>
 </html>
