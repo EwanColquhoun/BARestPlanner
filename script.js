@@ -47,7 +47,7 @@ function calculate (){
     let [latest, dur] = latestBlock(depTime, blockTime, mFdp)
     console.log(latest, dur, 'latest, dur')
     let lastTot = lastTo(latest, fltTime, mFdp)
-    let pilot = extraPilot(mFdp, eobt, dur)
+    let pilot = extraPilot(mFdp, eobt, blockTime, depTime, crew)
     display(depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilot)
 
 };
@@ -113,7 +113,7 @@ function latestBlock(depTime, blockTime, mFdp){
     // var dur = luxon.Duration.fromObject({hours: btime[0], minutes: btime[1]})
     // let updated = luxon.DateTime.fromISO(depTime).plus(dur).toString()
     let mFdpTime = luxon.Duration.fromObject({hours: max[0], minutes: max[1]})
-    let newDur = luxon.Duration.fromISO(mFdpTime).plus({hours: '0'}).toFormat('hhmm')
+    let newDur = luxon.Duration.fromISO(mFdpTime).plus({hours: '0'}).toFormat('T')
 
     let latestBlock = luxon.DateTime.fromISO(depTime).plus(mFdpTime).toFormat('T')
     return [latestBlock, newDur]
@@ -128,7 +128,7 @@ function lastTo(latest, fltTime, mFdp){
 }
 
 
-function extraPilot(mFdp, eobt){
+function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 	
 	let boxA = luxon.DateTime.fromISO(mFdp).plus({minutes: '30'}).toFormat('T')
 	let boxB = luxon.DateTime.fromISO(boxA).plus({hour: '1'}).toFormat('T')
@@ -146,11 +146,19 @@ function extraPilot(mFdp, eobt){
     // console.log(dur, 'dur')
    console.log(eobt, 'eobt')
    console.log(mFdp, 'mfdp')
+   console.log(blockTime, 'blocktime')
+   let splitBlock = blockTime.split(':')
+   let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
+   // predicted duty time =  (eobt+block) - report time
+    let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
+    console.log(eobtBlock, 'eobtBlock')
+    console.log('report', reportTime)
     // let splitmFdp = mFdp.split(':');
     // let updatedFdp = luxon.DateTime.fromObject({hours: splitmFdp[0], minutes: splitmFdp['1']}).toFormat('T')
     // console.log(updatedFdp, 'updatedFDP')
     // let pfdp = luxon.DateTime.fromObject({hours: estblock[0], minutes: estblock['1']}).plus({updatedFdp}).toFormat('T')
-    let pfdp = luxon.DateTime.fromISOTime(eobt).plus(mFdp).toFormat('T')
+    // let pfdp = luxon.DateTime.fromISO(eobtBlock).minus(reportTime).toFormat('T')
+    let pfdp = getDiff(eobtBlock, reportTime)
     console.log(pfdp, 'pfdp')
 
 	if (crew=='3' ){
@@ -183,6 +191,29 @@ function extraPilot(mFdp, eobt){
 	return rcmd
 } 
 
+function getDiff(time1, time2){
+    console.log('getdiff', time1, time2)
+    var splitted1 = time1.split(":");
+    var splitted2 = time2.split(":");
+    var time1 = splitted1[0]+splitted1[1];
+    var time2 = splitted2[0]+splitted2[1];
+    var hours;
+    var minutes;
+    if (time1 < time2) {
+        console.log('time1 is less')
+        var diff = Date.prototype.getTimeDiff(`${time1}`, `${time2}`, 'm');
+        hours = Math.floor((diff/60));
+        minutes =(diff%60);
+    } else {
+        console.log('time2 is less')
+    var diff1 = Date.prototype.getTimeDiff('24:00', time1, 'm');
+    var diff2 = Date.prototype.getTimeDiff(time2, '00:00', 'm');
+    var totalDiff = diff1+diff2;
+    hours = Math.floor((totalDiff/60));
+    minutes =(totalDiff%60);
+    };
+    return `${hours} + " hours, " + ${minutes} + " minutes"`;
+}
 
 
 // export {calculate}
