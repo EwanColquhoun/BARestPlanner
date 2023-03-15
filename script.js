@@ -4,9 +4,12 @@ let raw_fltTime = document.getElementById('fltTime')
 let raw_toTime = document.getElementById('toTime')
 let raw_acc = document.getElementById('acc')
 let raw_sectors = document.getElementById('sectors')
+
 let raw_crew = document.getElementById('crew')
 let raw_dest = document.getElementById('dest')
 let raw_eobt = document.getElementById('eobt') 
+
+let crewDiv = document.getElementById('crew-content')
 
 let calc = document.getElementById('calc')
 let results = document.getElementById('results-p')
@@ -29,6 +32,21 @@ let Other = [sixToEightOther,
     sixToTenOther,
     tenToSixOther]
 
+window.addEventListener("load", init(raw_crew, raw_sectors))
+
+function init(raw_crew, raw_sectors){
+    let crew = raw_crew.value
+    let crewDiv = document.getElementById('crew-content')
+    let sectors = raw_sectors.value
+    let sectorsDiv = document.getElementById('sectors-content')
+    
+    sectorsDiv.innerHTML=`
+    <p>${sectors}</p>`
+    
+    crewDiv.innerHTML=`
+    <p>${crew}</p>`
+}
+
 
 function calculate (){
     let depTime = raw_depTime.value
@@ -36,22 +54,23 @@ function calculate (){
     let fltTime = raw_fltTime.value
     // let toTime = raw_toTime.value
     let acc = raw_acc.value
-    let sectors = raw_sectors.value
     let crew = raw_crew.value
     let dest = raw_dest.value
     let eobt = raw_eobt.value
+    let sectors = raw_sectors.value
     console.log(depTime, blockTime, acc, sectors, crew, dest, eobt)
     let mFdp = fdp(depTime, sectors, dest)
     console.log(mFdp, 'mfdp')
     let [latest, dur] = latestBlock(depTime, blockTime, mFdp)
     console.log(latest, dur, 'latest, dur')
     let lastTot = lastTo(latest, fltTime, mFdp)
-    let pilot = extraPilot(mFdp, eobt, blockTime, depTime, crew)
-    display(depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilot)
+    let [pilots, newFdp, restRqd] = extraPilot(mFdp, eobt, blockTime, depTime, crew)
+    console.log(pilots, 'pilots')
+    display(depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilots, newFdp, restRqd)
 
 };
 
-function display (depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilot) {
+function display (depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilots, newFdp, restRqd) {
     results.innerHTML = `<span>
     Report Time (Local): ${depTime}<br>
     Block time:${blockTime}.<br>
@@ -60,11 +79,28 @@ function display (depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilo
     Acclimatised: ${acc}<br>
     MAX FDP: ${mFdp}<br>
     Latest on blocks: ${latest}<br>
-    Latest Take-off ${lastTot}
-    ${pilot}
+    Latest Take-off ${lastTot}<br>
+    New Crew compliment: ${pilots}<br>
+    New FDP: ${newFdp}<br>
+    Rest Required: ${restRqd}<br>
     </span>
     `
 }
+
+function populateSec(raw_sectors){
+    let sectors = raw_sectors.value
+    let sectorsDiv = document.getElementById('sectors-content')
+    sectorsDiv.innerHTML=`
+    <p>${sectors}</p>`
+}
+
+function populateCrew(raw_crew){
+    let crew = raw_crew.value
+    let crewDiv = document.getElementById('crew-content')
+    crewDiv.innerHTML=`
+    <p>${crew}</p>`
+}
+
 
 function fdp(dt, s, dest){
     let report = ''
@@ -135,18 +171,18 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 	let boxD = luxon.DateTime.fromISO(boxA).plus({hour: '5'}).toFormat('T')
 	let restRqd = '' 		//maybe needs these three variables out of function scope.
 	let newFdp = ''
-	let rcmd = ''
+	let rcmd = {}
     let nCrew = ''
     // let newEobt = luxon.DateTime.fromObject({eobt}).toISOTime({suppressSeconds: true})
     // let newEobt = luxon.DateTime.fromISOTime({eobt}).toObject().toFormat('T')
     let estblock = eobt.split(':');
 
-   console.log(eobt, 'eobt')
-   console.log(mFdp, 'mfdp')
-   console.log(blockTime, 'blocktime')
-   let splitBlock = blockTime.split(':')
-   let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
-   // predicted duty time =  (eobt+block) - report time
+    console.log(eobt, 'eobt')
+    console.log(mFdp, 'mfdp')
+    console.log(blockTime, 'blocktime')
+    let splitBlock = blockTime.split(':')
+    let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
+    // predicted duty time =  (eobt+block) - report time
     let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
     console.log(eobtBlock, 'eobtBlock')
     console.log('report', reportTime)
@@ -154,12 +190,7 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
     let pfdp = getDiff(eobtBlock, reportTime)
     console.log(pfdp, 'pfdp')
 
-	if (crew=='3' ){
-		newFdp = boxD
-		restRqd = '2LN before and after.'
-		nCrew = '4th Pilot'
-        console.log('3')
-	} else if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
+    if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
 		newFdp = boxA
 		restRqd = 'Minimum rest 12 hours.'
 		nCrew = '3rd Pilot'
@@ -174,15 +205,16 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 		restRqd = '2LN before if time zone change greater than 5 hours. 2LN after.'
 		nCrew = '3rd Pilot'
         console.log('2c')
+	} else if (crew=='3' && pfdp > boxB && pfdp <=boxC){
+		newFdp = boxD
+		restRqd = '2LN before and after.'
+		nCrew = '4th Pilot'
+        console.log('3')
 	}
-	
-	rcmd = `
-		${nCrew} required.
-		New max FDP is ${newFdp},
-		Rest required is ${restRqd}	
-	`
-	return rcmd
-} 
+
+    return [nCrew, newFdp, restRqd] 
+
+    } 
 
 function getDiff(time1, time2){
         //get values

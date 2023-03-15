@@ -5,3 +5,7 @@
 #input-div li{
     padding: 0.5rem
 }
+
+#crew-content, #sectors-content {
+    display: inline-block;
+}

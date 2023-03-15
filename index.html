@@ -31,11 +31,11 @@ https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js
                 </li>
                 <li>
                     <label for="to-time">Take-Off time:</label>
-                    <input id="toTime" autofocus name="to-time" type="time"> 
+                    <input id="toTime" name="to-time" type="time"> 
                 </li>
                 <li>
                     <label for="flt-time">Flight time:</label>
-                    <input id="fltTime" autofocus name="flt-time" type="time"> 
+                    <input id="fltTime" name="flt-time" type="time"> 
                 </li>
                 <li>
                     <label for="dest">Destination:</label>
@@ -51,11 +51,13 @@ https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js
                 </li>
                 <li>
                     <label for="sectors">Sectors:</label>
-                    <input type="range" name="sectors" id="sectors" max="4" step="1" value="1">
+                    <input type="range" name="sectors" id="sectors" max="4" min="1" step="1" value="1" onchange="populateSec(sectors)">
+                    <div id="sectors-content"></div>
                 </li>
                 <li>
                     <label for="crew">Crew:</label>
-                    <input type="range" name="crew" id="crew" max="4" step="1" value="2">
+                    <input type="range" name="crew" id="crew" max="4" min="2" step="1" value="2" onchange="populateCrew(crew)">
+                    <div id="crew-content"></div>
                 </li>
             </ul>
         </div>
