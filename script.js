@@ -1,13 +1,13 @@
 let raw_depTime = document.getElementById('depTime')
 let raw_blockTime = document.getElementById('blockTime')
 let raw_fltTime = document.getElementById('fltTime')
-let raw_toTime = document.getElementById('toTime')
 let raw_acc = document.getElementById('acc')
 let raw_sectors = document.getElementById('sectors')
-
 let raw_crew = document.getElementById('crew')
 let raw_dest = document.getElementById('dest')
 let raw_eobt = document.getElementById('eobt') 
+let raw_toTime = document.getElementById('taxiOutTime') 
+let raw_tiTime = document.getElementById('taxiInTime') 
 
 let crewDiv = document.getElementById('crew-content')
 
@@ -50,22 +50,24 @@ function init(raw_crew, raw_sectors){
 
 function calculate (){
     let depTime = raw_depTime.value
-    let blockTime = raw_blockTime.value
+    // let blockTime = raw_blockTime.value
     let fltTime = raw_fltTime.value
-    // let toTime = raw_toTime.value
+    let toTime = raw_toTime.value
+    let tiTime = raw_tiTime.value
     let acc = raw_acc.value
     let crew = raw_crew.value
     let dest = raw_dest.value
     let eobt = raw_eobt.value
     let sectors = raw_sectors.value
-    console.log(depTime, blockTime, acc, sectors, crew, dest, eobt)
+    // console.log(depTime, blockTime, acc, sectors, crew, dest, eobt)
+    let blockTime = getBlockTime(fltTime, tiTime, toTime)
     let mFdp = fdp(depTime, sectors, dest)
     console.log(mFdp, 'mfdp')
-    let [latest, dur] = latestBlock(depTime, blockTime, mFdp)
+    let [latest, dur] = latestOnBlock(depTime, blockTime, mFdp)
     console.log(latest, dur, 'latest, dur')
-    let lastTot = lastTo(latest, fltTime, mFdp)
+    let lastTot = lastOffBlocks(latest, blockTime)
     let [pilots, newFdp, restRqd] = extraPilot(mFdp, eobt, blockTime, depTime, crew)
-    console.log(pilots, 'pilots')
+    // console.log(pilots, 'pilots')
     display(depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilots, newFdp, restRqd)
 
 };
@@ -99,6 +101,17 @@ function populateCrew(raw_crew){
     let crewDiv = document.getElementById('crew-content')
     crewDiv.innerHTML=`
     <p>${crew}</p>`
+}
+
+function getBlockTime(fltTime, tiTime, toTime){
+    let splitTin = tiTime.split(':')
+    let luxontoTime = luxon.Duration.fromISOTime(toTime).toObject()
+    let luxonTaxi = luxon.Duration.fromObject(luxontoTime).plus({hours: splitTin[0], minutes: splitTin[1]})
+    let luxonFlt = luxon.Duration.fromISOTime(fltTime).toObject()
+   
+    let total = luxon.DateTime.fromObject(luxonFlt).plus(luxonTaxi).toFormat('T')
+
+    return total
 }
 
 
@@ -141,24 +154,25 @@ function fdp(dt, s, dest){
     } 
 }
 
-function latestBlock(depTime, blockTime, mFdp){
-    // let btime = blockTime.split(':');
+function latestOnBlock(depTime, blockTime, mFdp){
     let max = mFdp.split(':');
 
-    // var dur = luxon.Duration.fromObject({hours: btime[0], minutes: btime[1]})
-    // let updated = luxon.DateTime.fromISO(depTime).plus(dur).toString()
     let mFdpTime = luxon.Duration.fromObject({hours: max[0], minutes: max[1]})
-    let newDur = luxon.Duration.fromISO(mFdpTime).plus({hours: '0'}).toFormat('T')
+    let newDur = luxon.Duration.fromISO(mFdpTime).minus({hours: '0', minutes: '30'})
 
-    let latestBlock = luxon.DateTime.fromISO(depTime).plus(mFdpTime).toFormat('T')
+    let latestBlock = luxon.DateTime.fromISO(depTime).plus(newDur).toFormat('T')
     return [latestBlock, newDur]
 }
 
-function lastTo(latest, fltTime, mFdp){
-    let ftime = fltTime.split(':');
-    let dur = luxon.Duration.fromObject({hours: ftime[0], minutes: ftime['1']})
+function lastOffBlocks(latest, blockTime){
+
+    let splitBlock = blockTime.split(':');
+    let dur = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock['1']})
     let lastToTime = luxon.DateTime.fromISO(latest).minus(dur).toFormat('T')
+    
+    
     console.log(lastToTime, 'last TO time')
+
     return lastToTime
 }
 
@@ -168,7 +182,7 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 	let boxA = luxon.DateTime.fromISO(mFdp).plus({minutes: '30'}).toFormat('T')
 	let boxB = luxon.DateTime.fromISO(boxA).plus({hour: '1'}).toFormat('T')
 	let boxC = luxon.DateTime.fromISO(boxA).plus({hour: '3'}).toFormat('T')
-	let boxD = luxon.DateTime.fromISO(boxA).plus({hour: '5'}).toFormat('T')
+	let boxD = luxon.DateTime.fromISO(mFdp).plus({hour: '5'}).toFormat('T')
 	let restRqd = '' 		//maybe needs these three variables out of function scope.
 	let newFdp = ''
 	let rcmd = {}
