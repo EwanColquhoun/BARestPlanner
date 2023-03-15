@@ -1,4 +1,3 @@
-
 let raw_depTime = document.getElementById('depTime')
 let raw_blockTime = document.getElementById('blockTime')
 let raw_fltTime = document.getElementById('fltTime')
@@ -141,9 +140,7 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
     // let newEobt = luxon.DateTime.fromObject({eobt}).toISOTime({suppressSeconds: true})
     // let newEobt = luxon.DateTime.fromISOTime({eobt}).toObject().toFormat('T')
     let estblock = eobt.split(':');
-    // let newEobt = luxon.DateTime.fromObject({hours: estblock[0], minutes: estblock['1']}).toFormat('T')
-    // console.log('new eobt', newEobt)
-    // console.log(dur, 'dur')
+
    console.log(eobt, 'eobt')
    console.log(mFdp, 'mfdp')
    console.log(blockTime, 'blocktime')
@@ -153,11 +150,7 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
     let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
     console.log(eobtBlock, 'eobtBlock')
     console.log('report', reportTime)
-    // let splitmFdp = mFdp.split(':');
-    // let updatedFdp = luxon.DateTime.fromObject({hours: splitmFdp[0], minutes: splitmFdp['1']}).toFormat('T')
-    // console.log(updatedFdp, 'updatedFDP')
-    // let pfdp = luxon.DateTime.fromObject({hours: estblock[0], minutes: estblock['1']}).plus({updatedFdp}).toFormat('T')
-    // let pfdp = luxon.DateTime.fromISO(eobtBlock).minus(reportTime).toFormat('T')
+
     let pfdp = getDiff(eobtBlock, reportTime)
     console.log(pfdp, 'pfdp')
 
@@ -192,27 +185,30 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 } 
 
 function getDiff(time1, time2){
-    console.log('getdiff', time1, time2)
-    var splitted1 = time1.split(":");
-    var splitted2 = time2.split(":");
-    var time1 = splitted1[0]+splitted1[1];
-    var time2 = splitted2[0]+splitted2[1];
-    var hours;
-    var minutes;
-    if (time1 < time2) {
-        console.log('time1 is less')
-        var diff = Date.prototype.getTimeDiff(`${time1}`, `${time2}`, 'm');
-        hours = Math.floor((diff/60));
-        minutes =(diff%60);
-    } else {
-        console.log('time2 is less')
-    var diff1 = Date.prototype.getTimeDiff('24:00', time1, 'm');
-    var diff2 = Date.prototype.getTimeDiff(time2, '00:00', 'm');
-    var totalDiff = diff1+diff2;
-    hours = Math.floor((totalDiff/60));
-    minutes =(totalDiff%60);
-    };
-    return `${hours} + " hours, " + ${minutes} + " minutes"`;
+        //get values
+        var valuestart = time2
+        var valuestop = time1
+          
+         //create date format          
+         var timeStart = new Date("01/01/2007 " + valuestart).getTime();
+         var timeEnd = new Date("01/01/2007 " + valuestop).getTime();
+         
+        //  console.log(valuestart, valuestop, timeStart, timeEnd, 'start, end, timestart, timeend');
+         var timeDiff = timeEnd - timeStart;
+         if (timeDiff < 0) {
+             timeDiff = 86400000 + timeDiff;
+             hours = timeDiff/3600000
+             minutes = hours%60000
+            //  console.log('minus')
+            //  console.log(`${hours} hours, ${minutes} minutes.`)
+         } else {
+            // console.log('plus')
+             hours = timeDiff/3600000
+             minutes = hours/60
+            //  console.log(`${hours} hours, ${minutes} minutes.`)
+         }
+         return `${hours}:${minutes}`
+        
 }
 
 
