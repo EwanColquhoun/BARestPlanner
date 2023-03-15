@@ -1,4 +1,4 @@
-let raw_depTime = document.getElementById('depTime')
+let raw_repTime = document.getElementById('repTime')
 let raw_blockTime = document.getElementById('blockTime')
 let raw_fltTime = document.getElementById('fltTime')
 let raw_acc = document.getElementById('acc')
@@ -47,9 +47,10 @@ function init(raw_crew, raw_sectors){
     <p>${crew}</p>`
 }
 
+// raw_tiTime.addEventListener("change", displayBlockTime(blockTime))
 
 function calculate (){
-    let depTime = raw_depTime.value
+    let repTime = raw_repTime.value
     // let blockTime = raw_blockTime.value
     let fltTime = raw_fltTime.value
     let toTime = raw_toTime.value
@@ -59,33 +60,44 @@ function calculate (){
     let dest = raw_dest.value
     let eobt = raw_eobt.value
     let sectors = raw_sectors.value
-    // console.log(depTime, blockTime, acc, sectors, crew, dest, eobt)
+    // console.log(repTime, blockTime, acc, sectors, crew, dest, eobt)
     let blockTime = getBlockTime(fltTime, tiTime, toTime)
-    let mFdp = fdp(depTime, sectors, dest)
+    displayBlockTime(blockTime)
+    let mFdp = fdp(repTime, sectors, dest)
     console.log(mFdp, 'mfdp')
-    let [latest, dur] = latestOnBlock(depTime, blockTime, mFdp)
+    let [latest, dur] = latestOnBlock(repTime, blockTime, mFdp)
     console.log(latest, dur, 'latest, dur')
     let lastTot = lastOffBlocks(latest, blockTime)
-    let [pilots, newFdp, restRqd] = extraPilot(mFdp, eobt, blockTime, depTime, crew)
+    let [pilots, newFdp, restRqd, predFDP] = extraPilot(mFdp, eobt, blockTime, repTime, crew)
     // console.log(pilots, 'pilots')
-    display(depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilots, newFdp, restRqd)
+    display(repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, restRqd, predFDP)
 
 };
 
-function display (depTime,blockTime,sectors,acc,crew,mFdp, latest, lastTot, pilots, newFdp, restRqd) {
+function display (repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, restRqd, predFDP) {
     results.innerHTML = `<span>
-    Report Time (Local): ${depTime}<br>
+    Report Time (Local): ${repTime}<br>
     Block time:${blockTime}.<br>
-    Crew: ${crew}<br>
-    Sectors: ${sectors}<br>
     Acclimatised: ${acc}<br>
     MAX FDP: ${mFdp}<br>
+    Latest off blocks ${lastTot}<br>
     Latest on blocks: ${latest}<br>
-    Latest Take-off ${lastTot}<br>
-    New Crew compliment: ${pilots}<br>
-    New FDP: ${newFdp}<br>
+    <br>
+    Required Crew compliment: ${pilots}<br>
+    New FDP: ${predFDP}<br>
+    New max FDP: ${newFdp}<br>
+    Revised latest off blocks: 
     Rest Required: ${restRqd}<br>
     </span>
+    `
+}
+
+function displayBlockTime(blockTime){
+    let blockTimeHolder = document.getElementById('block-content')
+    blockTimeHolder.innerHTML = `
+    <p>
+    Calculated block time: ${blockTime}
+    </p>
     `
 }
 
@@ -103,6 +115,7 @@ function populateCrew(raw_crew){
     <p>${crew}</p>`
 }
 
+
 function getBlockTime(fltTime, tiTime, toTime){
     let splitTin = tiTime.split(':')
     let luxontoTime = luxon.Duration.fromISOTime(toTime).toObject()
@@ -115,19 +128,19 @@ function getBlockTime(fltTime, tiTime, toTime){
 }
 
 
-function fdp(dt, s, dest){
+function fdp(rt, s, dest){
     let report = ''
     if (dest == "USA & Canada") {
-        if ("06:00" <= dt && dt <= "07:59"){
+        if ("06:00" <= rt && rt <= "07:59"){
             report = sixToEight[s]
             return report
-        } else if ("0800" <= dt && dt <= "12:59"){
+        } else if ("0800" <= rt && rt <= "12:59"){
             report = eightToOne[s]
             return report
-        } else if ("1300" <= dt && dt <= "17:59"){
+        } else if ("1300" <= rt && rt <= "17:59"){
             report = oneToSix[s]
             return report
-        } else if ("1800" <= dt && dt <= "21:59"){
+        } else if ("1800" <= rt && rt <= "21:59"){
             report = sixToTen[s]
             return report
         } else {
@@ -135,16 +148,16 @@ function fdp(dt, s, dest){
             return report
         }
     } else {
-        if ("06:00" <= dt && dt <= "07:59"){
+        if ("06:00" <= rt && rt <= "07:59"){
             report = sixToEightOther[s]
             return report
-        } else if ("0800" <= dt && dt <= "12:59"){
+        } else if ("0800" <= rt && rt <= "12:59"){
             report = eightToOneOther[s]
             return report
-        } else if ("1300" <= dt && dt <= "17:59"){
+        } else if ("1300" <= rt && rt <= "17:59"){
             report = oneToSixOther[s]
             return report
-        } else if ("1800" <= dt && dt <= "21:59"){
+        } else if ("1800" <= rt && rt <= "21:59"){
             report = sixToTenOther[s]
             return report
         } else {
@@ -154,13 +167,13 @@ function fdp(dt, s, dest){
     } 
 }
 
-function latestOnBlock(depTime, blockTime, mFdp){
+function latestOnBlock(repTime, blockTime, mFdp){
     let max = mFdp.split(':');
 
     let mFdpTime = luxon.Duration.fromObject({hours: max[0], minutes: max[1]})
     let newDur = luxon.Duration.fromISO(mFdpTime).minus({hours: '0', minutes: '30'})
 
-    let latestBlock = luxon.DateTime.fromISO(depTime).plus(newDur).toFormat('T')
+    let latestBlock = luxon.DateTime.fromISO(repTime).plus(newDur).toFormat('T')
     return [latestBlock, newDur]
 }
 
@@ -226,7 +239,7 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
         console.log('3')
 	}
 
-    return [nCrew, newFdp, restRqd] 
+    return [nCrew, newFdp, restRqd, pfdp] 
 
     } 
 
@@ -238,23 +251,27 @@ function getDiff(time1, time2){
          //create date format          
          var timeStart = new Date("01/01/2007 " + valuestart).getTime();
          var timeEnd = new Date("01/01/2007 " + valuestop).getTime();
-         
-        //  console.log(valuestart, valuestop, timeStart, timeEnd, 'start, end, timestart, timeend');
+         let hours = ''
+         let minutes = ''
+
          var timeDiff = timeEnd - timeStart;
          if (timeDiff < 0) {
-             timeDiff = 86400000 + timeDiff;
-             hours = timeDiff/3600000
-             minutes = hours%60000
-            //  console.log('minus')
-            //  console.log(`${hours} hours, ${minutes} minutes.`)
+            timeDiff = 86400000 + timeDiff;
+            hours = timeDiff/3600000
+            let timeString = hours.toString().split('.')
+            hours = timeString[0]
+            minutes = timeString[1] *6
          } else {
-            // console.log('plus')
-             hours = timeDiff/3600000
-             minutes = hours/60
-            //  console.log(`${hours} hours, ${minutes} minutes.`)
-         }
-         return `${hours}:${minutes}`
+            hours = timeDiff/3600000
+            let timeString = hours.toString().split('.')
+            let longMin = timeString[1] *6
+            minutes = Math.trunc(longMin)
+            console.log(typeof(minutes))
+            hours = timeString[0]
+            }
+        let totalDiff = `${hours}:${minutes}`
         
+        return totalDiff
 }
 
 
