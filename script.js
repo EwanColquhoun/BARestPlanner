@@ -69,12 +69,13 @@ function calculate (){
     console.log(latest, dur, 'latest, dur')
     let lastTot = lastOffBlocks(latest, blockTime)
     let [pilots, newFdp, restRqd, predFDP] = extraPilot(mFdp, eobt, blockTime, repTime, crew)
+    let lastTotRevised = lastOffBlocksRevised(mFdp, newFdp, blockTime, lastTot)
     // console.log(pilots, 'pilots')
-    display(repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, restRqd, predFDP)
+    display(repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, restRqd, predFDP, lastTotRevised)
 
 };
 
-function display (repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, restRqd, predFDP) {
+function display (repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, restRqd, predFDP, lastOffBlocksRevised) {
     results.innerHTML = `<span>
     Report Time (Local): ${repTime}<br>
     Block time:${blockTime}.<br>
@@ -86,7 +87,7 @@ function display (repTime,blockTime,acc,mFdp, latest, lastTot, pilots, newFdp, r
     Required Crew compliment: ${pilots}<br>
     New FDP: ${predFDP}<br>
     New max FDP: ${newFdp}<br>
-    Revised latest off blocks: 
+    Revised latest off blocks: ${lastOffBlocksRevised}<br>
     Rest Required: ${restRqd}<br>
     </span>
     `
@@ -180,13 +181,31 @@ function latestOnBlock(repTime, blockTime, mFdp){
 function lastOffBlocks(latest, blockTime){
 
     let splitBlock = blockTime.split(':');
-    let dur = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock['1']})
+    let dur = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
     let lastToTime = luxon.DateTime.fromISO(latest).minus(dur).toFormat('T')
     
     
     console.log(lastToTime, 'last TO time')
 
     return lastToTime
+}
+
+function lastOffBlocksRevised(mFdp, newFdp, blockTime, lastTot){
+    let lastBlockTime = '';
+    
+    if (mFdp = newFdp){
+        lastBlockTime = lastTot
+    } else {
+   
+        let splitBlock = blockTime.split(':');
+        let dur = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
+        lastBlockTime = luxon.DateTime.fromISO(newFdp).minus(dur).toFormat('T')
+    }
+    
+    
+    console.log(lastBlockTime, 'last block time')
+
+    return lastBlockTime
 }
 
 
@@ -200,22 +219,24 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 	let newFdp = ''
 	let rcmd = {}
     let nCrew = ''
-    // let newEobt = luxon.DateTime.fromObject({eobt}).toISOTime({suppressSeconds: true})
-    // let newEobt = luxon.DateTime.fromISOTime({eobt}).toObject().toFormat('T')
     let estblock = eobt.split(':');
 
     console.log(eobt, 'eobt')
     console.log(mFdp, 'mfdp')
     console.log(blockTime, 'blocktime')
     let splitBlock = blockTime.split(':')
+    console.log(splitBlock, 'splitblock')
     let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
     // predicted duty time =  (eobt+block) - report time
-    let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
+    console.log(durBlock, 'durblock')
+
+    let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T') //ERROR with the duration of the block time.
     console.log(eobtBlock, 'eobtBlock')
     console.log('report', reportTime)
 
     let pfdp = getDiff(eobtBlock, reportTime)
-    console.log(pfdp, 'pfdp')
+    let luxonPFDP = luxon.DateTime.fromISO(pfdp).toFormat('T')
+    console.log(luxonPFDP, 'luxonpfdp')
 
     if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
 		newFdp = boxA
@@ -237,11 +258,16 @@ function extraPilot(mFdp, eobt, blockTime, reportTime, crew){
 		restRqd = '2LN before and after.'
 		nCrew = '4th Pilot'
         console.log('3')
-	}
+	} else if (crew=='2' && pfdp < mFdp && pfdp <= boxA) {
+        newFdp = mFdp
+		restRqd = 'Minimum rest 12 hours.'
+		nCrew = '2 Pilots'
+        console.log('2')
+    }
 
     return [nCrew, newFdp, restRqd, pfdp] 
+}
 
-    } 
 
 function getDiff(time1, time2){
         //get values
@@ -256,23 +282,26 @@ function getDiff(time1, time2){
 
          var timeDiff = timeEnd - timeStart;
          if (timeDiff < 0) {
+            console.log('top')
             timeDiff = 86400000 + timeDiff;
             hours = timeDiff/3600000
             let timeString = hours.toString().split('.')
             hours = timeString[0]
-            minutes = timeString[1] *6
+            let longMin = timeString[1] *6
+            minutes = longMin.toString().slice(0,2)
+            // minutes = Math.trunc(longMin)
+            console.log(longMin, 'longmin')
          } else {
+            console.log('bottom')
+
             hours = timeDiff/3600000
             let timeString = hours.toString().split('.')
             let longMin = timeString[1] *6
-            minutes = Math.trunc(longMin)
-            console.log(typeof(minutes))
+            minutes = longMin.toString().slice(0,2)
             hours = timeString[0]
             }
         let totalDiff = `${hours}:${minutes}`
+        console.log(totalDiff, 'predicted fdp')
         
         return totalDiff
 }
-
-
-// export {calculate}
