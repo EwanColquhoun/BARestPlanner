@@ -37,7 +37,8 @@ label {
 }
 
 #new-results-p, #results-p {
-    margin: 0 3rem;
+    margin: 1rem;
+    padding-bottom: 1rem;
 }
 
 .center-align {
@@ -55,4 +56,12 @@ label {
     padding: 0.5rem;
     width: 45%;
     height: 3rem;
+}
+
+.small {
+    font-size: smaller;
+}
+
+.larger {
+    font-size: larger;
 }

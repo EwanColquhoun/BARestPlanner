@@ -90,7 +90,7 @@ function calculate (){
         // console.log(extra, 'NO extra')
         // console.log(late, 'not late')
         // console.log(newFdp, 'new fdp from inside no extra')
-        noExtra(newFdp, lastPush);
+        noExtra();
     }
     
 };
@@ -98,33 +98,34 @@ function calculate (){
 function display (blockTime, mFdp, latest, lastPush) {
     results.innerHTML = `
     <h2>Results</h2><br>
-    <span>
+    <span class="larger">
     Report Time (Local): ${raw_repTime.value}<br>
     Block time:${blockTime}<br>
     MAX FDP: ${mFdp}<br>
     Latest off blocks <strong>${lastPush}z</strong><br>
     Latest on blocks: ${latest}z<br>
     </span>
+    <p class="small">
+    For information only. Please double check your results. Data from Bidline Rules 10.3
+    </p>
     `
 }
 
 function newDisplay (pilots, newFdp, restRqd, predFDP, lastOffBlocksRevised){
-    newResults.innerHTML = `<span>
+    newResults.innerHTML = `<span class="larger">
     <br>
     Required Crew compliment: ${pilots}<br>
     New FDP: ${predFDP}<br>
     New max FDP: ${newFdp}<br>
-    Revised latest off blocks: ${lastOffBlocksRevised}z<br>
+    Revised latest off blocks:<strong>${lastOffBlocksRevised}z</strong><br>
     Rest Required: ${restRqd}<br>
     </span>`
 }
 
-function noExtra(newFdp, lastPush){
-    newResults.innerHTML = `<span>
+function noExtra(){
+    newResults.innerHTML = `<span class="larger">
     <br>
     No additional crew required <br>
-    Max FDP: ${newFdp}<br>
-    Latest off blocks: ${lastPush}<br>
     </span>`
 }
 
