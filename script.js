@@ -1,7 +1,7 @@
 let raw_repTime = document.getElementById('repTime')
 let raw_blockTime = document.getElementById('blockTime')
 let raw_fltTime = document.getElementById('fltTime')
-let raw_acc = document.getElementById('acc')
+// let raw_acc = document.getElementById('acc')
 let raw_sectors = document.getElementById('sectors')
 let raw_crew = document.getElementById('crew')
 let raw_dest = document.getElementById('dest')
@@ -34,7 +34,7 @@ let Other = [sixToEightOther,
 
 window.addEventListener("load", init(raw_crew, raw_sectors))
 
-function init(raw_crew, raw_sectors){
+function init(raw_crew){
     let crew = raw_crew.value
     let crewDiv = document.getElementById('crew-content')
     let sectors = raw_sectors.value
@@ -55,7 +55,7 @@ function calculate (){
     let fltTime = raw_fltTime.value
     let toTime = raw_toTime.value
     let tiTime = raw_tiTime.value
-    let acc = raw_acc.value
+    // let acc = raw_acc.value
     let crew = raw_crew.value
     let dest = raw_dest.value
     let eobt = raw_eobt.value
@@ -63,7 +63,7 @@ function calculate (){
 
     let blockTime = getBlockTime(fltTime, tiTime, toTime)
     displayBlockTime(blockTime)
-    // console.log(repTime, blockTime, acc, sectors, crew, dest, eobt)
+    // console.log(repTime, blockTime, sectors, crew, dest, eobt)
     let mFdp = fdp(zRepTime, sectors, dest, crew)
     // console.log(mFdp, 'mfdp')
     let latest = latestOnBlock(zRepTime, mFdp)
@@ -72,7 +72,7 @@ function calculate (){
 
     late = eobtCalc(eobt, lastPush)
     // console.log(late, 'late outside')
-    display(blockTime,acc,mFdp, latest, lastPush)
+    display(blockTime, mFdp, latest, lastPush)
     let [pilots, newFdp, restRqd, predFDP, extraC] = extraPilot(mFdp, eobt, blockTime, zRepTime, crew, extra)
     extra = extraC
     // console.log(extra, 'extra outside')
@@ -93,11 +93,12 @@ function calculate (){
     
 };
 
-function display (blockTime,acc,mFdp, latest, lastPush) {
-    results.innerHTML = `<span>
+function display (blockTime, mFdp, latest, lastPush) {
+    results.innerHTML = `
+    <h2>Results</h2><br>
+    <span>
     Report Time (Local): ${raw_repTime.value}<br>
     Block time:${blockTime}.<br>
-    Acclimatised: ${acc}<br>
     MAX FDP: ${mFdp}<br>
     Latest off blocks ${lastPush}z<br>
     Latest on blocks: ${latest}z<br>
@@ -128,11 +129,7 @@ function noExtra(newFdp, lastPush){
 function eobtCalc(eobt, lastPush){
     let splitOne = eobt.split(':')
     let splitTwo = lastPush.split(':')
-
-    console.log(typeof(eobt))
-    console.log(typeof(lastPush))
     if (splitOne[0] >= splitTwo[0] && splitOne[1] > splitTwo[1]){
-        console.log('inside eobtCALC')
         return true
     } else {
         return false
@@ -296,25 +293,20 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew, extra){
 	let restRqd = '' 		
 	let newFdp = ''
     let nCrew = ''
-
     // console.log(eobt, 'eobt')
     // console.log(mFdp, 'mfdp from inside extra')
     // console.log(blockTime, 'blocktime')
     let splitBlock = blockTime.split(':')
     // console.log(splitBlock, 'splitblock')
     let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
-
-    console.log(durBlock, 'durblock')
-    console.log(eobt, 'eobt')
+    // console.log(durBlock, 'durblock')
+    // console.log(eobt, 'eobt')
     let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
     // console.log(eobtBlock, 'eobtBlock')
-
     let pfdpInit = getDiff(eobtBlock, zRep)
     let pfdp = luxon.DateTime.fromISO(pfdpInit).plus({minutes: '30'}).toFormat('T')
-
     // console.log(pfdp, 'pfdp')
     // console.log(mFdp, 'mfdp')
-
     if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
 		newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours.'

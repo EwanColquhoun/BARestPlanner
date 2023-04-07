@@ -10,25 +10,25 @@
 </head>
 <body>
     <div class="background">
-        <div>
+        <div class="center-align">
             <h1>BA Rest Planner</h1>
         </div>
         <div id="input-div">
             <ul>
                 <li>
                     <label for="rep-time">Report Time (Local):</label>
-                    <input id="repTime" autofocus name="rep-time" type="time" value="17:35"> 
+                    <input id="repTime" autofocus name="rep-time" type="time" > 
                 </li>
                 <li>
                     <label for="tout-time">OFP taxi time:</label>
-                    <input id="taxiOutTime" name="tout-time" type="time" value="00:35"> 
+                    <input id="taxiOutTime" name="tout-time" type="time" value="00:20"> 
                 </li>
                 <li>
-                    <label for="flt-time">Flight time:</label>
-                    <input id="fltTime" name="flt-time" type="time" value="10:35"> 
+                    <label for="flt-time">OFP Flight time:</label>
+                    <input id="fltTime" name="flt-time" type="time"> 
                 </li>
                 <li>
-                    <label for="ti-time">Taxi in time:</label>
+                    <label for="ti-time">Estimated Taxi in time:</label>
                     <input id="taxiInTime" name="ti-time" type="time" value="00:20"> 
                 </li>
                 <li>
@@ -36,7 +36,7 @@
                 </li>
                 <li>
                     <label for="eobt">EOBT:</label>
-                    <input id="eobt" name="eobt" type="time" value="19:35">
+                    <input id="eobt" name="eobt" type="time">
                 </li>
                 <li>
                     <label for="dest">Destination:</label>
@@ -46,36 +46,43 @@
                         <option value="Other">
                     </datalist>
                 </li>
-                <li>
+                <!-- <li>
                     <label for="acclimatised">Acclimatised:</label>
                     <input type="radio" name="acclimatised" id="acc" checked>
-                </li>
+                </li> -->
                 <li>
                     <label for="sectors">Sectors:</label>
-                    <input type="range" name="sectors" id="sectors" max="4" min="1" step="1" value="1" onchange="populateSec(sectors)">
+                    <input type="range" name="sectors" id="sectors" max="4" min="1" step="1" value="1" list="seclist" onchange="populateSec(sectors)">
+                    <datalist id="seclist">
+                        <option>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                    </datalist>
                     <div id="sectors-content"></div>
                 </li>
                 <li>
                     <label for="crew">Crew:</label>
-                    <input type="range" name="crew" id="crew" max="4" min="2" step="1" value="2" onchange="populateCrew(crew)">
+                    <input type="range" name="crew" id="crew" max="4" min="2" step="1" value="2" list="steplist" onchange="populateCrew(crew)">
+                    <datalist id="steplist">
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                    </datalist>
                     <div id="crew-content"></div>
                 </li>
             </ul>
         </div>
-        <div>
+        <div class="center-align">
             <button id="calc" autofocus onclick="calculate()">Calculate</button>
         </div>
         <div id="results-div">
             <div>
-                <h2>Results:</h2>
-            </div>
-            <div class="inline">
                 <p id="results-p"></p>
                 <p id="new-results-p"></p>
             </div>
         </div>       
     </div>
-    <!-- <script src="luxon.js"></script> -->
     <script src="script.js" type="application/javascript"></script>
 </body>
 </html>

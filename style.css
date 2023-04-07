@@ -1,7 +1,13 @@
 *{
     padding: 0;
-} 
+    margin: 0;
+    font-family: math, sans-serif;
+}
 
+body {
+    height: 100vh;
+    background-color: rgb(129, 151, 174);
+}
 
 #input-div {
     width: 70%;
@@ -16,15 +22,37 @@
     display: inline-block;
 }
 
+#block-content {
+    font-size: large;
+}
+
 input {
     display: inline-flex;
     align-self: flex-end;
+    padding: 0.3rem;
 }
 
-.inline {
-    display: inline-flex;
+label {
+    font-size: large;
 }
- 
-#new-results-p {
+
+#new-results-p, #results-p {
     margin: 0 3rem;
+}
+
+.center-align {
+    display: flex;
+    justify-content: center;
+    padding-top: 1rem;
+}
+
+#calc {
+    margin-bottom: 1rem;
+    background-color: lightseagreen;
+    border: 2px solid deepskyblue;
+    border-radius: 3px;
+    font-size: larger;
+    padding: 0.5rem;
+    width: 45%;
+    height: 3rem;
 }
