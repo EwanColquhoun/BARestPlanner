@@ -1,4 +1,4 @@
-let raw_repTime = document.getElementById('repTime')
+let raw_repTime = document.querySelector('#repTime')
 let raw_blockTime = document.getElementById('blockTime')
 let raw_fltTime = document.getElementById('fltTime')
 // let raw_acc = document.getElementById('acc')
@@ -39,13 +39,15 @@ function init(raw_crew){
     let crewDiv = document.getElementById('crew-content')
     let sectors = raw_sectors.value
     let sectorsDiv = document.getElementById('sectors-content')
-    
     sectorsDiv.innerHTML=`
     <p>${sectors}</p>`
-    
     crewDiv.innerHTML=`
     <p>${crew}</p>`
+    raw_repTime.value = luxon.DateTime.now().toFormat('T')
+
 }
+
+raw_repTime.addEventListener("change", populateEobt(raw_repTime))
 
 function calculate (){
     let late = false
@@ -98,9 +100,9 @@ function display (blockTime, mFdp, latest, lastPush) {
     <h2>Results</h2><br>
     <span>
     Report Time (Local): ${raw_repTime.value}<br>
-    Block time:${blockTime}.<br>
+    Block time:${blockTime}<br>
     MAX FDP: ${mFdp}<br>
-    Latest off blocks ${lastPush}z<br>
+    Latest off blocks <strong>${lastPush}z</strong><br>
     Latest on blocks: ${latest}z<br>
     </span>
     `
@@ -143,6 +145,13 @@ function displayBlockTime(blockTime){
     Calculated block time: ${blockTime}
     </p>
     `
+}
+
+function populateEobt(rpt){
+    let time = rpt.value
+    // console.log(time, 'popo eobyt')
+    let defaultEobt = luxon.DateTime.fromISO(time).plus({minutes: 30}).toFormat('T')
+    raw_eobt.value = defaultEobt
 }
 
 function populateSec(raw_sectors){
