@@ -63,7 +63,7 @@ function calculate (){
     // console.log(repTime, blockTime, acc, sectors, crew, dest, eobt)
     let blockTime = getBlockTime(fltTime, tiTime, toTime)
     displayBlockTime(blockTime)
-    let mFdp = fdp(repTime, sectors, dest)
+    let mFdp = fdp(repTime, sectors, dest, crew)
     console.log(mFdp, 'mfdp')
     let [latest, dur] = latestOnBlock(repTime, blockTime, mFdp)
     console.log(latest, dur, 'latest, dur')
@@ -129,42 +129,83 @@ function getBlockTime(fltTime, tiTime, toTime){
 }
 
 
-function fdp(rt, s, dest){
+function fdp(rt, s, dest, crew){
     let report = ''
-    if (dest == "USA & Canada") {
-        if ("06:00" <= rt && rt <= "07:59"){
-            report = sixToEight[s]
-            return report
-        } else if ("0800" <= rt && rt <= "12:59"){
-            report = eightToOne[s]
-            return report
-        } else if ("1300" <= rt && rt <= "17:59"){
-            report = oneToSix[s]
-            return report
-        } else if ("1800" <= rt && rt <= "21:59"){
-            report = sixToTen[s]
-            return report
+    if (crew == "2"){
+        if (dest == "USA & Canada") {
+            if ("06:00" <= rt && rt <= "07:59"){
+                report = sixToEight[s]
+                return report
+            } else if ("0800" <= rt && rt <= "12:59"){
+                report = eightToOne[s]
+                return report
+            } else if ("1300" <= rt && rt <= "17:59"){
+                report = oneToSix[s]
+                return report
+            } else if ("1800" <= rt && rt <= "21:59"){
+                report = sixToTen[s]
+                return report
+            } else {
+                report = tenToSix[s]
+                return report
+            }
         } else {
-            report = tenToSix[s]
-            return report
-        }
-    } else {
-        if ("06:00" <= rt && rt <= "07:59"){
-            report = sixToEightOther[s]
-            return report
-        } else if ("0800" <= rt && rt <= "12:59"){
-            report = eightToOneOther[s]
-            return report
-        } else if ("1300" <= rt && rt <= "17:59"){
-            report = oneToSixOther[s]
-            return report
-        } else if ("1800" <= rt && rt <= "21:59"){
-            report = sixToTenOther[s]
-            return report
+            if ("06:00" <= rt && rt <= "07:59"){
+                report = sixToEightOther[s]
+                return report
+            } else if ("0800" <= rt && rt <= "12:59"){
+                report = eightToOneOther[s]
+                return report
+            } else if ("1300" <= rt && rt <= "17:59"){
+                report = oneToSixOther[s]
+                return report
+            } else if ("1800" <= rt && rt <= "21:59"){
+                report = sixToTenOther[s]
+                return report
+            } else {
+                report = tenToSixOther[s]
+                return report
+            }
+        } 
+    } else if (crew == "3"){
+        if (dest == "USA & Canada") {
+            if ("06:00" <= rt && rt <= "07:59"){
+                report = luxon.DateTime.fromISO(sixToEight[s]).plus({hour: '3'}).toFormat('T')
+                return report
+            } else if ("0800" <= rt && rt <= "12:59"){
+                report = luxon.DateTime.fromISO(eightToOne[s]).plus({hour: '3'}).toFormat('T')
+                return report
+            } else if ("1300" <= rt && rt <= "17:59"){
+                report = luxon.DateTime.fromISO(oneToSix[s]).plus({hour: '3'}).toFormat('T')
+                return report
+            } else if ("1800" <= rt && rt <= "21:59"){
+                report = luxon.DateTime.fromISO(sixToTen[s]).plus({hour: '3'}).toFormat('T')
+                return report
+            } else {
+                report = luxon.DateTime.fromISO(tenToSix[s]).plus({hour: '3'}).toFormat('T')
+                return report
+            }
         } else {
-            report = tenToSixOther[s]
-            return report
+            if ("06:00" <= rt && rt <= "07:59"){
+                report = sixToEightOther[s]
+                return report
+            } else if ("0800" <= rt && rt <= "12:59"){
+                report = eightToOneOther[s]
+                return report
+            } else if ("1300" <= rt && rt <= "17:59"){
+                report = oneToSixOther[s]
+                return report
+            } else if ("1800" <= rt && rt <= "21:59"){
+                report = sixToTenOther[s]
+                return report
+            } else {
+                report = tenToSixOther[s]
+                return report
+            }
         }
+    } if (crew == "4"){
+        report = "18:00"
+        return report
     } 
 }
 
