@@ -26,7 +26,7 @@ body {
     font-size: large;
 }
 
-input {
+input, select {
     display: inline-flex;
     align-self: flex-end;
     padding: 0.3rem;
@@ -64,4 +64,16 @@ label {
 
 .larger {
     font-size: larger;
+}
+
+.dim {
+    opacity: 0.4;
+}
+
+.hide{
+    display: none;    
+}
+
+.show{
+    display: inline-block
 }

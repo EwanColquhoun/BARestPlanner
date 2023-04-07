@@ -78,17 +78,18 @@ function calculate (){
     let [pilots, newFdp, restRqd, predFDP, extraC] = extraPilot(mFdp, eobt, blockTime, zRepTime, crew, extra)
     extra = extraC
     // console.log(extra, 'extra outside')
-    // console.log(extra, 'extra outside')
     if (extra == true && late == true) {
         let lastTotRevised = lastOffBlocksRevised(mFdp, newFdp, blockTime, lastPush, zRepTime)
         // console.log(extra, 'extra')
-        // console.log(late, 'late')
+        console.log(late, 'late')
         // console.log(newFdp, 'extra NEW FDP')
         // console.log(mFdp, 'extra NEW mFDP')
+        results.classList.add('dim')
         newDisplay( pilots, newFdp, restRqd, predFDP, lastTotRevised);
     } else {
+        results.classList.remove('dim')
         // console.log(extra, 'NO extra')
-        // console.log(late, 'not late')
+        console.log(late, 'not late')
         // console.log(newFdp, 'new fdp from inside no extra')
         noExtra();
     }
@@ -96,8 +97,10 @@ function calculate (){
 };
 
 function display (blockTime, mFdp, latest, lastPush) {
+    let title = document.querySelector('#rTitle')
+    title.classList.replace('hide', 'show')
     results.innerHTML = `
-    <h2>Results</h2><br>
+    <br>
     <span class="larger">
     Report Time (Local): ${raw_repTime.value}<br>
     Block time:${blockTime}<br>
