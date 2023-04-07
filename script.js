@@ -9,7 +9,7 @@ let raw_eobt = document.getElementById('eobt')
 let raw_toTime = document.getElementById('taxiOutTime') 
 let raw_tiTime = document.getElementById('taxiInTime') 
 let crewDiv = document.getElementById('crew-content')
-let extra = false
+
 let calc = document.getElementById('calc')
 let results = document.getElementById('results-p')
 let newResults = document.getElementById('new-results-p')
@@ -47,12 +47,11 @@ function init(raw_crew, raw_sectors){
     <p>${crew}</p>`
 }
 
-// raw_tiTime.addEventListener("change", displayBlockTime(blockTime))
-
 function calculate (){
+    let late = false
+    let extra = false
     let repTime = raw_repTime.value
     let zRepTime = hasDST(repTime)
-    // let blockTime = raw_blockTime.value
     let fltTime = raw_fltTime.value
     let toTime = raw_toTime.value
     let tiTime = raw_tiTime.value
@@ -64,23 +63,31 @@ function calculate (){
 
     let blockTime = getBlockTime(fltTime, tiTime, toTime)
     displayBlockTime(blockTime)
-    console.log(repTime, blockTime, acc, sectors, crew, dest, eobt)
+    // console.log(repTime, blockTime, acc, sectors, crew, dest, eobt)
     let mFdp = fdp(zRepTime, sectors, dest, crew)
     // console.log(mFdp, 'mfdp')
     let latest = latestOnBlock(zRepTime, mFdp)
     // console.log(latest, dur, 'latest, dur')
     let lastPush = lastOffBlocks(latest, blockTime)
-    let [pilots, newFdp, restRqd, predFDP, extra] = extraPilot(mFdp, eobt, blockTime, zRepTime, crew)
-    // console.log(pilots, 'pilots')
+
+    late = eobtCalc(eobt, lastPush)
+    // console.log(late, 'late outside')
     display(blockTime,acc,mFdp, latest, lastPush)
-    if (extra == true) {
+    let [pilots, newFdp, restRqd, predFDP, extraC] = extraPilot(mFdp, eobt, blockTime, zRepTime, crew, extra)
+    extra = extraC
+    // console.log(extra, 'extra outside')
+    // console.log(extra, 'extra outside')
+    if (extra == true && late == true) {
         let lastTotRevised = lastOffBlocksRevised(mFdp, newFdp, blockTime, lastPush, zRepTime)
-        console.log(extra, 'extra')
-        console.log(newFdp, 'extra NEW FDP')
-        console.log(mFdp, 'extra NEW mFDP')
+        // console.log(extra, 'extra')
+        // console.log(late, 'late')
+        // console.log(newFdp, 'extra NEW FDP')
+        // console.log(mFdp, 'extra NEW mFDP')
         newDisplay( pilots, newFdp, restRqd, predFDP, lastTotRevised);
     } else {
-        console.log(extra, 'NO extra')
+        // console.log(extra, 'NO extra')
+        // console.log(late, 'not late')
+        // console.log(newFdp, 'new fdp from inside no extra')
         noExtra(newFdp, lastPush);
     }
     
@@ -99,7 +106,6 @@ function display (blockTime,acc,mFdp, latest, lastPush) {
 }
 
 function newDisplay (pilots, newFdp, restRqd, predFDP, lastOffBlocksRevised){
-    console.log('new Display')
     newResults.innerHTML = `<span>
     <br>
     Required Crew compliment: ${pilots}<br>
@@ -117,6 +123,20 @@ function noExtra(newFdp, lastPush){
     Max FDP: ${newFdp}<br>
     Latest off blocks: ${lastPush}<br>
     </span>`
+}
+
+function eobtCalc(eobt, lastPush){
+    let splitOne = eobt.split(':')
+    let splitTwo = lastPush.split(':')
+
+    console.log(typeof(eobt))
+    console.log(typeof(lastPush))
+    if (splitOne[0] >= splitTwo[0] && splitOne[1] > splitTwo[1]){
+        console.log('inside eobtCALC')
+        return true
+    } else {
+        return false
+    }
 }
 
 function displayBlockTime(blockTime){
@@ -262,7 +282,7 @@ function lastOffBlocksRevised(mFdp, newFdp, blockTime, lastPush, repTime){
     return lastBlockTime
 }
 
-function extraPilot(mFdp, eobt, blockTime, zRep, crew){
+function extraPilot(mFdp, eobt, blockTime, zRep, crew, extra){
 	
     let boxA = ''
     let boxB = ''
@@ -271,10 +291,9 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew){
         boxA = luxon.DateTime.fromISO(mFdp).plus({minutes: '30'}).toFormat('T')
         boxB = luxon.DateTime.fromISO(boxA).plus({hour: '1'}).toFormat('T')
         boxC = luxon.DateTime.fromISO(boxA).plus({hour: '3'}).toFormat('T')
-        console.log(boxA, boxB, boxC)
+        // console.log(boxA, boxB, boxC)
     }
-	// let boxD = luxon.DateTime.fromISO(mFdp).plus({hour: '5'}).toFormat('T')
-	let restRqd = '' 		//maybe needs these three variables out of function scope.
+	let restRqd = '' 		
 	let newFdp = ''
     let nCrew = ''
 
@@ -282,54 +301,54 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew){
     // console.log(mFdp, 'mfdp from inside extra')
     // console.log(blockTime, 'blocktime')
     let splitBlock = blockTime.split(':')
-    console.log(splitBlock, 'splitblock')
+    // console.log(splitBlock, 'splitblock')
     let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
-    // predicted duty time =  (eobt+block) - mfdpCalc time
+
     console.log(durBlock, 'durblock')
     console.log(eobt, 'eobt')
-    let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T') //ERROR with the duration of the block time.
-    console.log(eobtBlock, 'eobtBlock')
-    // let zmfdp = hasDST(mfdpCalcTime)
-    let pfdp = getDiff(eobtBlock, zRep)
-    // let luxonPFDP = luxon.DateTime.fromISO(pfdp).toFormat('T')
-    // console.log(luxonPFDP, 'luxonpfdp')
-    console.log(pfdp, 'pfdp')
-    console.log(mFdp, 'mfdp')
+    let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
+    // console.log(eobtBlock, 'eobtBlock')
+
+    let pfdpInit = getDiff(eobtBlock, zRep)
+    let pfdp = luxon.DateTime.fromISO(pfdpInit).plus({minutes: '30'}).toFormat('T')
+
+    // console.log(pfdp, 'pfdp')
+    // console.log(mFdp, 'mfdp')
 
     if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
 		newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours.'
 		nCrew = '3rd Pilot'
-        console.log('2A')
+        // console.log('2A')
         extra = true
 	} else if (crew=='2' && pfdp > boxA && pfdp <= boxB){
 		newFdp = mFdp
 		restRqd = '2LN after flight.'
 		nCrew = '3rd Pilot'
-        console.log('2b')
+        // console.log('2b')
         extra = true
 	} else if (crew=='2' && pfdp > boxB && pfdp <= boxC){
 		newFdp = mFdp
 		restRqd = '2LN before if time zone change greater than 5 hours. 2LN after.'
 		nCrew = '3rd Pilot'
-        console.log('2c')
+        // console.log('2c')
         extra = true
 	} else if (crew=='3' && pfdp > mFdp){
 		newFdp = "18:00"
 		restRqd = '2LN before and after.'
 		nCrew = '4th Pilot'
-        console.log('3')
+        // console.log('3')
         extra = true
 	} else if (crew=='2' && pfdp < mFdp) {
         newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours.'
 		nCrew = '2 Pilots'
-        console.log('2')
+        // console.log('2')
     } else {
         newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours/Or FDP if longer'
 		nCrew = 'Current'
-        console.log('else')
+        // console.log('else')
     }
 
     return [nCrew, newFdp, restRqd, pfdp, extra]
@@ -373,7 +392,7 @@ function getDiff(time1, time2){
             hours = timeString[0]
             }
         let totalDiff = `${hours}:${minutes}`
-        console.log(totalDiff, 'predicted fdp')
+        // console.log(totalDiff, 'predicted fdp')
         
         return totalDiff
 }
@@ -382,10 +401,10 @@ function hasDST(mfdpCalcTime){
     let z = luxon.DateTime.fromISO(mfdpCalcTime)
     if (z.isInDST) {
         let zRep = luxon.DateTime.fromISO(mfdpCalcTime).minus(3600000).toFormat('T')
-        console.log('DST')
+        // console.log('DST')
         return zRep
     } else {
-        console.log('no dst')
+        // console.log('no dst')
         return z
     }
 

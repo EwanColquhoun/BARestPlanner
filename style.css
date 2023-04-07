@@ -20,3 +20,11 @@ input {
     display: inline-flex;
     align-self: flex-end;
 }
+
+.inline {
+    display: inline-flex;
+}
+ 
+#new-results-p {
+    margin: 0 3rem;
+}
