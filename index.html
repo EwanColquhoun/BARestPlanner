@@ -5,9 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BA Rest Planner</title>
-    <script src="
-https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js
-"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
     <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body>
@@ -19,26 +17,26 @@ https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js
             <ul>
                 <li>
                     <label for="rep-time">Report Time (Local):</label>
-                    <input id="repTime" autofocus name="rep-time" type="time"> 
+                    <input id="repTime" autofocus name="rep-time" type="time" value="17:35"> 
                 </li>
                 <li>
                     <label for="tout-time">OFP taxi time:</label>
-                    <input id="taxiOutTime" name="tout-time" type="time"> 
+                    <input id="taxiOutTime" name="tout-time" type="time" value="00:35"> 
                 </li>
                 <li>
                     <label for="flt-time">Flight time:</label>
-                    <input id="fltTime" name="flt-time" type="time"> 
+                    <input id="fltTime" name="flt-time" type="time" value="10:35"> 
                 </li>
                 <li>
                     <label for="ti-time">Taxi in time:</label>
-                    <input id="taxiInTime" name="ti-time" type="time"> 
+                    <input id="taxiInTime" name="ti-time" type="time" value="00:20"> 
                 </li>
                 <li>
                     <div id="block-content"> Calculated Block Time: ...</div>
                 </li>
                 <li>
                     <label for="eobt">EOBT:</label>
-                    <input id="eobt" name="eobt" type="time">
+                    <input id="eobt" name="eobt" type="time" value="19:35">
                 </li>
                 <li>
                     <label for="dest">Destination:</label>
@@ -73,6 +71,9 @@ https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js
             </div>
             <div>
                 <p id="results-p"></p>
+            </div>
+            <div>
+                <p id="new-results-p"></p>
             </div>
         </div>       
     </div>
