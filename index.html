@@ -7,6 +7,7 @@
     <title>FTL Planner</title>
     <script src="https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js"></script>
     <link rel="stylesheet" href="style.css" type="text/css">
+    <link rel="icon prefetch" type="image/png" sizes="64x64" href="/media/images/clock.png">
 </head>
 <body>
     <div class="background">
@@ -31,9 +32,9 @@
                     <label for="ti-time">Estimated Taxi in time:</label>
                     <input id="taxiInTime" name="ti-time" type="time" value="00:20"> 
                 </li>
-                <li>
+                <!-- <li>
                     <div id="block-content"> Calculated Block Time: ...</div>
-                </li>
+                </li> -->
                 <li>
                     <label for="eobt">EOBT(z):</label>
                     <input id="eobt" name="eobt" type="time">
@@ -77,7 +78,7 @@
         </div>
         <div id="results-div">
             <div>
-                <h2 id="rTitle" class="hide">Results</h2>
+                <h2 id="rTitle" class="hide">Results:</h2>
                 <p id="results-p"></p>
                 <p id="new-results-p"></p>
             </div>

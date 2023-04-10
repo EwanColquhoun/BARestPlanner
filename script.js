@@ -53,7 +53,8 @@ function calculate (){
     let late = false
     let extra = false
     let repTime = raw_repTime.value
-    let zRepTime = hasDST(repTime)
+    let zRepTime = zulu(repTime)
+    console.log(zRepTime, "Z report time")
     let fltTime = raw_fltTime.value
     let toTime = raw_toTime.value
     let tiTime = raw_tiTime.value
@@ -64,7 +65,7 @@ function calculate (){
     let sectors = raw_sectors.value
 
     let blockTime = getBlockTime(fltTime, tiTime, toTime)
-    displayBlockTime(blockTime)
+    // displayBlockTime(blockTime)
     // console.log(repTime, blockTime, sectors, crew, dest, eobt)
     let mFdp = fdp(zRepTime, sectors, dest, crew)
     // console.log(mFdp, 'mfdp')
@@ -81,7 +82,7 @@ function calculate (){
     if (extra == true && late == true) {
         let lastTotRevised = lastOffBlocksRevised(mFdp, newFdp, blockTime, lastPush, zRepTime)
         // console.log(extra, 'extra')
-        console.log(late, 'late')
+        // console.log(late, 'late')
         // console.log(newFdp, 'extra NEW FDP')
         // console.log(mFdp, 'extra NEW mFDP')
         results.classList.add('dim')
@@ -89,7 +90,7 @@ function calculate (){
     } else {
         results.classList.remove('dim')
         // console.log(extra, 'NO extra')
-        console.log(late, 'not late')
+        // console.log(late, 'not late')
         // console.log(newFdp, 'new fdp from inside no extra')
         noExtra();
     }
@@ -142,18 +143,17 @@ function eobtCalc(eobt, lastPush){
     }
 }
 
-function displayBlockTime(blockTime){
-    let blockTimeHolder = document.getElementById('block-content')
-    blockTimeHolder.innerHTML = `
-    <p>
-    Calculated block time: ${blockTime}
-    </p>
-    `
-}
+// function displayBlockTime(blockTime){
+//     let blockTimeHolder = document.getElementById('block-content')
+//     blockTimeHolder.innerHTML = `
+//     <p>
+//     Calculated block time: ${blockTime}
+//     </p>
+//     `
+// }
 
 function populateEobt(rpt){
     let time = rpt.value
-    // console.log(time, 'popo eobyt')
     let defaultEobt = luxon.DateTime.fromISO(time).plus({minutes: 30}).toFormat('T')
     raw_eobt.value = defaultEobt
 }
@@ -359,7 +359,6 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew, extra){
     return [nCrew, newFdp, restRqd, pfdp, extra]
 }
 
-
 function getDiff(time1, time2){
         //get values
         var valuestart = time2
@@ -402,15 +401,20 @@ function getDiff(time1, time2){
         return totalDiff
 }
 
-function hasDST(mfdpCalcTime){
+function zulu(mfdpCalcTime){
+    // var local = luxon.DateTime.local();
+    // console.log(local.zoneName, 'local')
+    // console.log(rezoned, 'local Def')
     let z = luxon.DateTime.fromISO(mfdpCalcTime)
-    if (z.isInDST) {
-        let zRep = luxon.DateTime.fromISO(mfdpCalcTime).minus(3600000).toFormat('T')
-        // console.log('DST')
-        return zRep
-    } else {
-        // console.log('no dst')
-        return z
-    }
+    var rezoned = z.setZone("UTC");
+    return rezoned
+    // if (z.isInDST) {
+    //     let zRep = luxon.DateTime.fromISO(mfdpCalcTime).minus(3600000).toFormat('T')
+    //     // console.log('DST')
+    //     return zRep
+    // } else {
+    //     // console.log('no dst')
+    //     return z
+    // }
 
 }

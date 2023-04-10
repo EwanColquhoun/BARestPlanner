@@ -41,6 +41,10 @@ label {
     padding-bottom: 1rem;
 }
 
+#rTitle {
+    margin-left: 1rem;
+}
+
 .center-align {
     display: flex;
     justify-content: center;
