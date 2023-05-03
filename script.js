@@ -54,9 +54,15 @@ function calculate (){
     let extra = false
     let repTime = raw_repTime.value
     let zRepTime = zulu(repTime)
-    console.log(zRepTime, "Z report time")
+    // console.log(zRepTime, "Z report time")
     let fltTime = raw_fltTime.value
+    if (fltTime == ''){
+        alert("Please enter a flight time from the OFP to get correct data.")
+        return
+    }
     let toTime = raw_toTime.value
+    
+
     let tiTime = raw_tiTime.value
     // let acc = raw_acc.value
     let crew = raw_crew.value
@@ -70,34 +76,33 @@ function calculate (){
     let mFdp = fdp(zRepTime, sectors, dest, crew)
     // console.log(mFdp, 'mfdp')
     let latest = latestOnBlock(zRepTime, mFdp)
-    // console.log(latest, dur, 'latest, dur')
     let lastPush = lastOffBlocks(latest, blockTime)
-
+    // console.log(eobt, lastPush, 'eobt/push')
     late = eobtCalc(eobt, lastPush)
-    // console.log(late, 'late outside')
-    display(blockTime, mFdp, latest, lastPush)
+    console.log(late, 'late outside')
     let [pilots, newFdp, restRqd, predFDP, extraC] = extraPilot(mFdp, eobt, blockTime, zRepTime, crew, extra)
     extra = extraC
-    // console.log(extra, 'extra outside')
+    console.log(extra, 'extra outside')
+    display(blockTime, mFdp, latest, lastPush, newFdp, predFDP)
     if (extra == true && late == true) {
         let lastTotRevised = lastOffBlocksRevised(mFdp, newFdp, blockTime, lastPush, zRepTime)
-        // console.log(extra, 'extra')
-        // console.log(late, 'late')
+        console.log(extra, 'extra inside')
+        console.log(late, 'late inside')
         // console.log(newFdp, 'extra NEW FDP')
         // console.log(mFdp, 'extra NEW mFDP')
         results.classList.add('dim')
         newDisplay( pilots, newFdp, restRqd, predFDP, lastTotRevised);
     } else {
         results.classList.remove('dim')
-        // console.log(extra, 'NO extra')
-        // console.log(late, 'not late')
+        console.log(extra, 'NO extra pilots')
+        console.log(late, 'not late')
         // console.log(newFdp, 'new fdp from inside no extra')
         noExtra();
     }
     
 };
 
-function display (blockTime, mFdp, latest, lastPush) {
+function display (blockTime, mFdp, latest, lastPush, newFdp, predFDP) {
     let title = document.querySelector('#rTitle')
     title.classList.replace('hide', 'show')
     results.innerHTML = `
@@ -105,12 +110,13 @@ function display (blockTime, mFdp, latest, lastPush) {
     <span class="larger">
     Report Time (Local): ${raw_repTime.value}<br>
     Block time:${blockTime}<br>
+    Predicted FDP: ${predFDP}<br>
     MAX FDP: ${mFdp}<br>
     Latest off blocks <strong>${lastPush}z</strong><br>
     Latest on blocks: ${latest}z<br>
     </span>
     <p class="small">
-    For information only. Please double check your results. Data from Bidline Rules 10.3
+    For information only. Please double check your results. Data from Bidline Rules 10.3 and OMA Section 7
     </p>
     `
 }
@@ -134,23 +140,11 @@ function noExtra(){
 }
 
 function eobtCalc(eobt, lastPush){
-    let splitOne = eobt.split(':')
-    let splitTwo = lastPush.split(':')
-    if (splitOne[0] >= splitTwo[0] && splitOne[1] > splitTwo[1]){
-        return true
-    } else {
-        return false
-    }
+    if (eobt > lastPush)
+        return true;
+    else
+        return false;
 }
-
-// function displayBlockTime(blockTime){
-//     let blockTimeHolder = document.getElementById('block-content')
-//     blockTimeHolder.innerHTML = `
-//     <p>
-//     Calculated block time: ${blockTime}
-//     </p>
-//     `
-// }
 
 function populateEobt(rpt){
     let time = rpt.value
@@ -185,6 +179,8 @@ function getBlockTime(fltTime, tiTime, toTime){
 
 function fdp(rt, s, dest, crew){
     let mfdpCalc = ''
+    // let rt = luxon.DateTime.fromISO(rtz, {setZone: "UTC"}).toFormat('T') //to consolidate all these into one funciton or remove z report altogether
+    // console.log(rt, s, dest, crew)
     if (crew == "2"){
         if (dest == "USA & Canada") {
             if ("06:00" <= rt && rt <= "07:59"){
@@ -313,47 +309,52 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew, extra){
     // console.log(splitBlock, 'splitblock')
     let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
     // console.log(durBlock, 'durblock')
-    // console.log(eobt, 'eobt')
+    // console.log(zRep, 'zrep')
     let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
     // console.log(eobtBlock, 'eobtBlock')
+    // let normRpt = luxon.DateTime.fromISO(zRep, {setZone: "UTC"}).toFormat('T')
+    // console.log(normRpt, 'normrpt')
     let pfdpInit = getDiff(eobtBlock, zRep)
+    // console.log(pfdpInit, 'pinit')
+    // let predictedfdp = luxon.DateTime.fromISO(pfdpInit).toFormat('hh:mm')
+    // console.log(predictedfdp, 'pred')
     let pfdp = luxon.DateTime.fromISO(pfdpInit).plus({minutes: '30'}).toFormat('T')
-    // console.log(pfdp, 'pfdp')
+    console.log(pfdp, 'pfdp')
     // console.log(mFdp, 'mfdp')
     if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
 		newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours.'
 		nCrew = '3rd Pilot'
-        // console.log('2A')
+        console.log('2A')
         extra = true
 	} else if (crew=='2' && pfdp > boxA && pfdp <= boxB){
 		newFdp = mFdp
 		restRqd = '2LN after flight.'
 		nCrew = '3rd Pilot'
-        // console.log('2b')
+        console.log('2b')
         extra = true
 	} else if (crew=='2' && pfdp > boxB && pfdp <= boxC){
 		newFdp = mFdp
 		restRqd = '2LN before if time zone change greater than 5 hours. 2LN after.'
 		nCrew = '3rd Pilot'
-        // console.log('2c')
+        console.log('2c')
         extra = true
 	} else if (crew=='3' && pfdp > mFdp){
 		newFdp = "18:00"
 		restRqd = '2LN before and after.'
 		nCrew = '4th Pilot'
-        // console.log('3')
+        console.log('3')
         extra = true
 	} else if (crew=='2' && pfdp < mFdp) {
         newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours.'
 		nCrew = '2 Pilots'
-        // console.log('2')
+        console.log('2')
     } else {
         newFdp = mFdp
 		restRqd = 'Minimum rest 12 hours/Or FDP if longer'
 		nCrew = 'Current'
-        // console.log('else')
+        console.log('else')
     }
 
     return [nCrew, newFdp, restRqd, pfdp, extra]
@@ -372,41 +373,40 @@ function getDiff(time1, time2){
 
          var timeDiff = timeEnd - timeStart;
          if (timeDiff < 0) {
-            // console.log('top')
             timeDiff = 86400000 + timeDiff;
             hours = timeDiff/3600000
             if (hours % 1 == '0'){
                 minutes = '00'
             } else {
                 let timeString = hours.toString().split('.')
-                // console.log(timeString, 'ts')
                 hours = timeString[0]
                 let longMin = timeString[1] *6
                 minutes = longMin.toString().slice(0,2)
-                // minutes = Math.trunc(longMin)
-                // console.log(longMin, 'longmin')
             }
          } else {
-            // console.log('bottom')
-
             hours = timeDiff/3600000
             let timeString = hours.toString().split('.')
             let longMin = timeString[1] *6
             minutes = longMin.toString().slice(0,2)
             hours = timeString[0]
             }
-        let totalDiff = `${hours}:${minutes}`
-        // console.log(totalDiff, 'predicted fdp')
         
+        //Always return hours as two digits
+        if (hours.length == 1){
+            hours = '0'+hours
+        }
+
+        let totalDiff = `${hours}:${minutes}`        
         return totalDiff
 }
 
 function zulu(mfdpCalcTime){
     // var local = luxon.DateTime.local();
     // console.log(local.zoneName, 'local')
-    // console.log(rezoned, 'local Def')
-    let z = luxon.DateTime.fromISO(mfdpCalcTime)
-    var rezoned = z.setZone("UTC");
+    // // console.log(rezoned, 'local Def')
+    // let z = luxon.DateTime.fromISO(mfdpCalcTime)
+    // var rezoned = z.setZone("UTC");
+    var rezoned = luxon.DateTime.fromISO(mfdpCalcTime, {setZone: "UTC"}).toFormat('T')
     return rezoned
     // if (z.isInDST) {
     //     let zRep = luxon.DateTime.fromISO(mfdpCalcTime).minus(3600000).toFormat('T')

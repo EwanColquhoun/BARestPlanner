@@ -53,13 +53,20 @@ label {
 
 #calc {
     margin-bottom: 1rem;
-    background-color: lightseagreen;
-    border: 2px solid deepskyblue;
+    background-color: #132cec;
+    border: unset;
+    color:antiquewhite;
     border-radius: 3px;
     font-size: larger;
     padding: 0.5rem;
     width: 45%;
     height: 3rem;
+}
+
+#calc:hover {
+    transform: scale(1.02);
+    transition: 200ms;
+    border: 1px solid antiquewhite;
 }
 
 .small {
