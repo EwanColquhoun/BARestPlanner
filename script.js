@@ -54,7 +54,7 @@ function calculate (){
     let extra = false
     let repTime = raw_repTime.value
     let zRepTime = zulu(repTime)
-    // console.log(zRepTime, "Z report time")
+    console.log(zRepTime, "Z report time")
     let fltTime = raw_fltTime.value
     if (fltTime == ''){
         alert("Please enter a flight time from the OFP to get correct data.")
@@ -74,7 +74,7 @@ function calculate (){
     // displayBlockTime(blockTime)
     // console.log(repTime, blockTime, sectors, crew, dest, eobt)
     let mFdp = fdp(zRepTime, sectors, dest, crew)
-    // console.log(mFdp, 'mfdp')
+    console.log(mFdp, 'mfdp')
     let latest = latestOnBlock(zRepTime, mFdp)
     let lastPush = lastOffBlocks(latest, blockTime)
     // console.log(eobt, lastPush, 'eobt/push')
@@ -110,13 +110,14 @@ function display (blockTime, mFdp, latest, lastPush, newFdp, predFDP) {
     <span class="larger">
     Report Time (Local): ${raw_repTime.value}<br>
     Block time:${blockTime}<br>
-    Predicted FDP: ${predFDP}<br>
+    Predicted FDP *: ${predFDP}<br>
     MAX FDP: ${mFdp}<br>
     Latest off blocks <strong>${lastPush}z</strong><br>
     Latest on blocks: ${latest}z<br>
     </span>
     <p class="small">
     For information only. Please double check your results. Data from Bidline Rules 10.3 and OMA Section 7
+    <br>*Predicted FDP includes BLR 30 additional post flight minutes.
     </p>
     `
 }
@@ -173,8 +174,10 @@ function getBlockTime(fltTime, tiTime, toTime){
     let luxonFlt = luxon.Duration.fromISOTime(fltTime).toObject()
    
     let total = luxon.DateTime.fromObject(luxonFlt).plus(luxonTaxi).toFormat('T')
+    console.log(total, 'total')
 
     return total
+    //correct
 }
 
 function fdp(rt, s, dest, crew){
@@ -308,10 +311,10 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew, extra){
     let splitBlock = blockTime.split(':')
     // console.log(splitBlock, 'splitblock')
     let durBlock = luxon.Duration.fromObject({hours: splitBlock[0], minutes: splitBlock[1]})
-    // console.log(durBlock, 'durblock')
+    console.log(durBlock, 'durblock')
     // console.log(zRep, 'zrep')
     let eobtBlock = luxon.DateTime.fromISO(eobt).plus(durBlock).toFormat('T')
-    // console.log(eobtBlock, 'eobtBlock')
+    console.log(eobtBlock, 'eobtBlock')
     // let normRpt = luxon.DateTime.fromISO(zRep, {setZone: "UTC"}).toFormat('T')
     // console.log(normRpt, 'normrpt')
     let pfdpInit = getDiff(eobtBlock, zRep)
@@ -319,7 +322,7 @@ function extraPilot(mFdp, eobt, blockTime, zRep, crew, extra){
     // let predictedfdp = luxon.DateTime.fromISO(pfdpInit).toFormat('hh:mm')
     // console.log(predictedfdp, 'pred')
     let pfdp = luxon.DateTime.fromISO(pfdpInit).plus({minutes: '30'}).toFormat('T')
-    console.log(pfdp, 'pfdp')
+    // console.log(pfdp, 'pfdp')
     // console.log(mFdp, 'mfdp')
     if (crew=='2' && pfdp > mFdp && pfdp <= boxA){
 		newFdp = mFdp
@@ -372,6 +375,7 @@ function getDiff(time1, time2){
          let minutes = ''
 
          var timeDiff = timeEnd - timeStart;
+        //  console.log(timeDiff, 'td')
          if (timeDiff < 0) {
             timeDiff = 86400000 + timeDiff;
             hours = timeDiff/3600000
@@ -395,6 +399,10 @@ function getDiff(time1, time2){
         if (hours.length == 1){
             hours = '0'+hours
         }
+        
+        if (minutes == '99'){
+            minutes = '10'
+        };
 
         let totalDiff = `${hours}:${minutes}`        
         return totalDiff
@@ -404,17 +412,19 @@ function zulu(mfdpCalcTime){
     // var local = luxon.DateTime.local();
     // console.log(local.zoneName, 'local')
     // // console.log(rezoned, 'local Def')
-    // let z = luxon.DateTime.fromISO(mfdpCalcTime)
+    let z = luxon.DateTime.fromISO(mfdpCalcTime)
+    // console.log(z, 'z')
     // var rezoned = z.setZone("UTC");
-    var rezoned = luxon.DateTime.fromISO(mfdpCalcTime, {setZone: "UTC"}).toFormat('T')
-    return rezoned
-    // if (z.isInDST) {
-    //     let zRep = luxon.DateTime.fromISO(mfdpCalcTime).minus(3600000).toFormat('T')
-    //     // console.log('DST')
-    //     return zRep
-    // } else {
-    //     // console.log('no dst')
-    //     return z
-    // }
+    // var rezoned = luxon.DateTime.fromISO(mfdpCalcTime, {setZone: "UTC"}).toFormat('T')
+    // console.log(rezoned, 'rezoned')
+    // return rezoned
+    if (z.isInDST) {
+        let zRep = luxon.DateTime.fromISO(mfdpCalcTime).minus(3600000).toFormat('T')
+        // console.log('DST')
+        return zRep
+    } else {
+        // console.log('no dst')
+        return z
+    }
 
 }
